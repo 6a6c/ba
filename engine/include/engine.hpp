@@ -33,7 +33,8 @@ class engine {
         mat4* cameraTransform;
         mat4 resultingMatrix;
 
-        float *x, *y, *z;
+        float x, y, z;
+        float yaw, pitch, roll;
 
         object tmp;
 };

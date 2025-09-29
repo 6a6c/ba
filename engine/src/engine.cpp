@@ -8,16 +8,21 @@ engine::engine() {
     this->tmp.readFromFile((char *)"assets/utah.tri");
 
     this->baseTransform = basePerspectiveMatrix(((float) WINDOW_HEIGHT / WINDOW_WIDTH), 1.57, 1, 100);
-    this->cameraTransform = cameraTransformMatrix(0, 0, 0, 0, -1, 4);
     
-    this->x = &(this->cameraTransform->matrix[0][3]);
-    this->y = &(this->cameraTransform->matrix[1][3]);
-    this->z = &(this->cameraTransform->matrix[2][3]);
+    this->x = 0;
+    this->y = -1;
+    this->z = 4;
+
+    this->yaw = 0;
+    this->pitch = 0;
+    this->roll = 0;
+ 
+    this->cameraTransform = cameraTransformMatrix(this->yaw, this->pitch, this->roll, this->x, this->y, this->z);    
 }
 
 engine::~engine() {
-    delete[] this->baseTransform;
-    delete[] this->cameraTransform;
+    delete this->baseTransform;
+    delete this->cameraTransform;
 }
 
 /* SDL initialization and starts main loop */
@@ -68,24 +73,34 @@ bool engine::poll() {
         if(e.type == SDL_EVENT_KEY_DOWN) {
             switch(e.key.key){
                 case SDLK_W:
-                    *this->z -= .1;
+                    this->z -= .1;
                     break;
                 case SDLK_S:
-                    *this->z += .1;
+                    this->z += .1;
                     break;
                 case SDLK_A:
-                    *this->x += .1;
+                    this->x += .1;
                     break;
                 case SDLK_D:
-                    *this->x -= .1;
+                    this->x -= .1;
                     break;
                 case SDLK_SPACE:
-                    *this->y -= .1;
+                    this->y -= .1;
                     break;
                 case SDLK_LCTRL:
-                    *this->y += .1;
+                    this->y += .1;
+                    break;
+                case SDLK_E:
+                    this->roll -= .1;
+                    break;
+                case SDLK_Q:
+                    this->roll +=.1;
                     break;
             }
+        }
+        if(e.type == SDL_EVENT_MOUSE_MOTION) {
+            this->yaw -= e.motion.yrel / 100;
+            this->pitch -= e.motion.xrel / 100;
         }
     }
 
@@ -123,6 +138,11 @@ bool engine::update() {
 
 /* Renders the world into frame buffer */
 void engine::render(Uint64 aTicks) {
+
+    delete this->cameraTransform;
+
+    this->cameraTransform = cameraTransformMatrix(this->yaw, this->pitch, this->roll, this->x, this->y, this->z);    
+
     this->resultingMatrix = *this->baseTransform * *this->cameraTransform;
 
     this->tmp.project(&(this->resultingMatrix));

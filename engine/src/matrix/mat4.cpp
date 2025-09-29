@@ -26,14 +26,25 @@ mat4* basePerspectiveMatrix(float aspect, float theta, float near, float far) {
 }
 
 /* Generates a camera transform matrix to move objects relative to the camera. */
-mat4* cameraTransformMatrix(float pitch, float yaw, float roll, float dx, float dy, float dz){
+mat4* cameraTransformMatrix(float roll, float pitch, float yaw, float dx, float dy, float dz){
     mat4* ret = new mat4();
 
-    ret->matrix[0][0] = 1.0;
-    ret->matrix[1][1] = 1.0;
-    ret->matrix[2][2] = 1.0;
-    ret->matrix[3][3] = 1.0;
+    /* 3x3 rotation matrix */
+    /* https://en.wikipedia.org/wiki/Rotation_matrix#General_3D_rotations */
+    ret->matrix[0][0] = cos(yaw) * cos(pitch);
+    ret->matrix[0][1] = cos(yaw) * sin(pitch) * sin(roll) - sin(yaw) * cos(roll);
+    ret->matrix[0][2] = cos(yaw) * sin(pitch) * cos(roll) + sin(yaw) * sin(roll);
 
+    ret->matrix[1][0] = sin(yaw) * cos(pitch);
+    ret->matrix[1][1] = sin(yaw) * sin(pitch) * sin(roll) + cos(yaw) * cos(roll);
+    ret->matrix[1][2] = sin(yaw) * sin(pitch) * cos(roll) - cos(yaw) * sin(roll);
+
+    ret->matrix[2][0] = -1 * sin(pitch);
+    ret->matrix[2][1] = cos(pitch) * sin(yaw);
+    ret->matrix[2][2] = cos(pitch) * cos(yaw);
+
+
+    /* Translation column */
     ret->matrix[0][3] = dx;
     ret->matrix[1][3] = dy;
     ret->matrix[2][3] = dz;
